@@ -7,7 +7,9 @@
 #include "Heap.h"
 #include "MinHeap.h"
 #include <string>
+#include <algorithm>
 #include <vector>
+#include <iostream>
 
 
 
@@ -32,6 +34,17 @@ namespace array {
         delete[] edges;
     }
 
+    //this method is used to get the index of a given word
+    int Graph::getIndex(const std::string &word){
+        auto it = std::find(words.begin(),words.end(),word);
+        if(it != words.end()){
+            return std::distance(words.begin(),it);
+        }
+        return -1;
+    }
+
+    //this method is used to add a word to the graph,
+    //it also adds an edge with the words which has one letter difference
     void Graph::addWord(const std::string &word) {
         words.push_back(word);
         int newWordIndex = words.size() - 1;
@@ -48,6 +61,7 @@ namespace array {
             }
             if (diffCount == 1) {
                 addEdge(i, newWordIndex);
+                addEdge(newWordIndex, i);
             }
         }
 
@@ -79,8 +93,50 @@ namespace array {
             }
         }
     }
+    void Graph::depthFirstSearch(bool *visited, int fromNode) {
+        for (int toNode = 0; toNode < vertexCount; toNode++){
+            if (edges[fromNode][toNode] > 0){
+                if (!visited[toNode]){
+                    visited[toNode] = true;
+                    depthFirstSearch(visited, toNode);
+                }
+            }
+        }
+    }
 
-    Path *Graph::dijkstra(int source) {
+    Edge *Graph::edgeList(int &edgeCount) {
+        Edge* list;
+        edgeCount = 0;
+        for (int i = 0; i < vertexCount; i++){
+            for (int j = 0; j < vertexCount; j++){
+                if (edges[i][j] > 0){
+                    edgeCount++;
+                }
+            }
+        }
+        list = new Edge[edgeCount];
+        int index = 0;
+        for (int i = 0; i < vertexCount; i++){
+            for (int j = 0; j < vertexCount; j++){
+                if (edges[i][j] > 0){
+                    list[index] = Edge(i, j, edges[i][j]);
+                    index++;
+                }
+            }
+        }
+        return list;
+    }
+
+
+    //this method is used to get the shortest path-using dijkstra's algorithm- and print that path between two words
+    std::vector<std::string> Graph:: shortestPath(const std::string &startWord,const std::string &endWord){
+        int source = getIndex(startWord);
+        int destination = getIndex(endWord);
+        if(source == -1 && destination == -1){
+            std::cout << "Words not found in the graph!" <<std::endl;
+            return { };
+        }
+
         Path *shortestPaths = initializePaths(source);
         MinHeap heap = MinHeap(vertexCount);
         for (int i = 0; i < vertexCount; i++) {
@@ -90,16 +146,32 @@ namespace array {
             HeapNode node = heap.deleteTop();
             int fromNode = node.getName();
             for (int toNode = 0; toNode < vertexCount; toNode++) {
-                int newDistance = shortestPaths[fromNode].getDistance() + edges[fromNode][toNode];
-                if (newDistance < shortestPaths[toNode].getDistance()) {
-                    int position = heap.search(toNode);
-                    heap.update(position, newDistance);
-                    shortestPaths[toNode].setDistance(newDistance);
-                    shortestPaths[toNode].setPrevious(fromNode);
+                if(edges[fromNode][toNode] > 0) {
+                    int newDistance = shortestPaths[fromNode].getDistance() + edges[fromNode][toNode];
+                    if (newDistance < shortestPaths[toNode].getDistance()) {
+                        int position = heap.search(toNode);
+                        heap.update(position, newDistance);
+                        shortestPaths[toNode].setDistance(newDistance);
+                        shortestPaths[toNode].setPrevious(fromNode);
+                    }
                 }
             }
         }
-        return shortestPaths;
+        std::vector<std::string> pathWords;
+        int currentVertex = destination;
+        while(currentVertex != source){
+            pathWords.push_back(words[currentVertex]);
+            currentVertex = shortestPaths[currentVertex].getPrevious();
+        }
+        pathWords.push_back(words[source]);
+        std::reverse(pathWords.begin(),pathWords.end());
+        std::cout << "The path from " << startWord << " to " << endWord << " is:" << std::endl;
+        for(const std::string &word : pathWords){
+            std::cout << word << " ";
+        }
+        std::cout << std::endl;
+        delete[] shortestPaths;
+        return pathWords;
     }
 }
 

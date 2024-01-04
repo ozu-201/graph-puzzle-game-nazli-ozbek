@@ -8,10 +8,12 @@
 #include <vector>
 #include "Graph.h"
 #include <fstream>
+#include <iostream>
 
 
 DictionaryReader :: DictionaryReader(const std::string filename) : dictionaryFileName(filename){}
 
+//this method is used to get the letter count of a word
 int DictionaryReader::countLetters(const std::string word){
     int count = 0;
     for(char letter:word){
@@ -23,8 +25,9 @@ int DictionaryReader::countLetters(const std::string word){
     }
     return count;
 }
-
-void DictionaryReader :: readDictionaryToGraph(){
+//This method reads the file, generates three separate graphs according to letter count,adds the words to those graphs
+//then calls the shortestPath method for the needed graph according to the inputs
+void DictionaryReader :: readDictionaryToGraph(const std::string &startWord,const std::string &endWord){
     std::ifstream file(dictionaryFileName);
     if(file.is_open()){
         std:: string word;
@@ -59,7 +62,16 @@ void DictionaryReader :: readDictionaryToGraph(){
         for(std::string word5 : g5WordList){
             g5.addWord(word5);
         }
+        if(countLetters(startWord) == 3 && countLetters(endWord)==3){
+            g3.shortestPath(startWord,endWord);
+        }
+        if(countLetters(startWord) == 4 && countLetters(endWord)==4){
+            g4.shortestPath(startWord,endWord);
+        }
+        if(countLetters(startWord) == 5 && countLetters(endWord)==5){
+            g5.shortestPath(startWord,endWord);
+        }
     } else{
-
+    std::cout << "File no found!"<< std::endl;
     }
 }

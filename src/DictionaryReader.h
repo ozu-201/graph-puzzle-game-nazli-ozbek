@@ -13,7 +13,7 @@
 class DictionaryReader {
 public:
     DictionaryReader(const std::string filename);
-    void readDictionaryToGraph();
+    void readDictionaryToGraph(const std::string &startWord,const std::string &endWord);
 private:
     std::string dictionaryFileName;
     int countLetters(const std::string word);

@@ -9,6 +9,7 @@
 #include "AbstractGraph.h"
 #include <string>
 #include <vector>
+#include "Edge.h"
 
 namespace array{
     class Graph : public AbstractGraph{
@@ -22,6 +23,10 @@ namespace array{
         void addEdge(int from, int to);
         void addEdge(int from, int to, int weight);
         Path* dijkstra(int source);
+        void depthFirstSearch(bool* visited, int fromNode);
+        Edge* edgeList(int& edgeCount);
+        int getIndex(const std::string &word);
+        std::vector<std::string> shortestPath(const std::string &startWord,const std::string &endWord);
 
     protected:
         void breadthFirstSearch(bool* visited, int startNode) override;

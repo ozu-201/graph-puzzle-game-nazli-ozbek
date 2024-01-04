@@ -20,3 +20,7 @@ void Path::setDistance(int _distance) {
 void Path::setPrevious(int _previous) {
     this->previous = _previous;
 }
+
+int Path::getPrevious() const {
+    return previous;
+}
